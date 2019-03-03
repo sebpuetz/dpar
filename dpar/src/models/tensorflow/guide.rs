@@ -39,7 +39,7 @@ where
             .layer_lookup(Layer::DepRel)
             .unwrap()
             .len();
-        let n_non_lookup_inputs = n_deprel_embeds * T::ATTACHMENT_ADDRS.len();
+        let n_non_lookup_inputs = T::ATTACHMENT_ADDRS.len();
         let mut input_non_lookup_tensors =
             Tensor::new(&[states.len() as u64, n_non_lookup_inputs as u64]);
 

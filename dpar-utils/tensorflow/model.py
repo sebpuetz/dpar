@@ -109,7 +109,7 @@ class ParseModel:
 
         n_attachment_addrs = 2
         self._assoc_strengths = tf.placeholder(
-            tf.float32, [batch_size, n_deprel_embeds * n_attachment_addrs], "assoc_strengths")
+            tf.float32, [batch_size, n_attachment_addrs], "assoc_strengths")
 
         # Features are converted to a one-hot representation.
         n_features = int(shapes["n_features"])

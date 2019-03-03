@@ -31,6 +31,7 @@ use stdinout::OrExit;
 use tensorflow::Tensor;
 
 use dpar_utils::{Config, FileProgress, SerializableTransitionSystem, TomlRead};
+use std::collections::HashMap;
 
 fn print_usage(program: &str, opts: Options) {
     let brief = format!("Usage: {} [options] CONFIG TRAIN_DATA VALID_DATA", program);
@@ -75,10 +76,11 @@ fn main() {
         .parser
         .load_inputs()
         .or_exit("Cannot load lookups", 1);
-    let association_strengths = config
-        .parser
-        .load_associations()
-        .or_exit("Cannot load association strengths", 1);
+//    let association_strengths = config
+//        .parser
+//        .load_associations()
+//        .or_exit("Cannot load association strengths", 1);
+    let association_strengths = HashMap::new();
     let vectorizer = InputVectorizer::new(lookups, inputs, association_strengths);
 
     eprintln!("Vectorizing training data...");
@@ -192,7 +194,7 @@ where
             .save(format!("epoch-{}", epoch))
             .or_exit(format!("Cannot save model for epoch {}", epoch), 1);
 
-        let (_, acc) = run_epoch(
+        let (loss, acc) = run_epoch(
             &mut model,
             &validation_labels,
             &validation_lookup_inputs,

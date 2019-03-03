@@ -26,6 +26,7 @@ use getopts::Options;
 use stdinout::{Input, OrExit, Output};
 
 use dpar_utils::{Config, SerializableTransitionSystem, TomlRead};
+use std::collections::HashMap;
 
 fn print_usage(program: &str, opts: &Options) {
     let brief = format!("Usage: {} [options] CONFIG [INPUT]", program);
@@ -107,7 +108,8 @@ where
     let inputs = config.parser.load_inputs()?;
     let lookups = config.lookups.load_lookups()?;
     let layer_ops = config.lookups.layer_ops();
-    let association_strengths = config.parser.load_associations()?;
+    //let association_strengths = config.parser.load_associations()?;
+    let association_strengths = HashMap::new();
     let vectorizer = InputVectorizer::new(lookups, inputs, association_strengths);
     let system: S = load_system_generic(config)?;
     let guide = load_model(&config, system, vectorizer, &layer_ops)?;
@@ -222,6 +224,7 @@ where
 {
     fn drop(&mut self) {
         if !self.batch_sents.is_empty() {
+            println!("last_batch");
             match self.parse_batch() {
                 Ok(_) => (),
                 Err(e) => eprintln!("Could not parse last batch: {}", e),

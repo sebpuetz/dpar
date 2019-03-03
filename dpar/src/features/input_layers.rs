@@ -193,7 +193,7 @@ impl InputVectorizer {
             .layer_lookup(Layer::DepRel)
             .unwrap()
             .len();
-        let mut non_lookup_layer = vec![0f32; n_deprel_embeds * attachment_addrs.len()];
+        let mut non_lookup_layer = vec![0f32; attachment_addrs.len()];
 
         self.realize_into(
             state,
@@ -285,28 +285,64 @@ impl InputVectorizer {
         non_lookup_slice: &mut [f32],
         attachment_addrs: &[AttachmentAddr],
     ) {
-        if let Some(deprel_layer) = self.layer_lookups.layer_lookup(Layer::DepRel) {
-            let deprels = deprel_layer.lookup_values();
+        for (idx, addr) in attachment_addrs.into_iter().enumerate() {
+            let addr_head = addr::AddressedValue {
+                address: vec![addr.head],
+                layer: addr::Layer::Feature("clause_rels".into()),
+            };
 
-            for (idx, (addr, deprel)) in
-                iproduct!(attachment_addrs.iter(), deprels.iter()).enumerate()
-            {
-                let addr_head = addr::AddressedValue {
-                    address: vec![addr.head],
-                    layer: addr::Layer::Token,
+            let addr_dep = addr::AddressedValue {
+                address: vec![addr.dependent],
+                layer: addr::Layer::Feature("clause_rels".into()),
+            };
+            let head_rels = addr_head.get(state);
+            let dep_rels = addr_dep.get(state);
+            if let (Some(rels_0), Some(rels_1)) = (head_rels, dep_rels) {
+                let rels_0_vec = rels_0
+                    .split(',')
+                    .into_iter()
+                    .filter(|s| !s.is_empty())
+                    .map(|s| s.parse::<f32>().unwrap())
+                    .collect::<Vec<f32>>();
+                let rels_1_vec = rels_1
+                    .split(',')
+                    .into_iter()
+                    .filter(|s| !s.is_empty())
+                    .map(|s| s.parse::<f32>().unwrap())
+                    .collect::<Vec<f32>>();
+                let clause_rel = if rels_0.len() > rels_1.len() {
+                    let distance = rels_0_vec.len() - rels_1_vec.len();
+                    rels_0_vec[distance-1]
+                } else {
+                    let distance = rels_1_vec.len() - rels_0_vec.len();
+                    rels_1_vec[distance-1]
                 };
-                let addr_dependent = addr::AddressedValue {
-                    address: vec![addr.dependent],
-                    layer: addr::Layer::Token,
-                };
-                let head = addr_head.get(state);
-                let dependent = addr_dependent.get(state);
-                if let (Some(head), Some(dependent)) = (head, dependent) {
-                    let association = self.assoc_strength(&head, &dependent, &deprel);
-                    non_lookup_slice[idx] = association;
-                }
+                non_lookup_slice[idx] = clause_rel;
             }
         }
+
+//        if let Some(deprel_layer) = self.layer_lookups.layer_lookup(Layer::DepRel) {
+//            let deprels = deprel_layer.lookup_values();
+//
+//            for (idx, (addr, deprel)) in
+//                iproduct!(attachment_addrs.iter(), deprels.iter()).enumerate()
+//            {
+//                let addr_head = addr::AddressedValue {
+//                    address: vec![addr.head],
+//                    layer: addr::Layer::Token,
+//                };
+//                let addr_dependent = addr::AddressedValue {
+//                    address: vec![addr.dependent],
+//                    layer: addr::Layer::Token,
+//                };
+//                let head = addr_head.get(state);
+//                let dependent = addr_dependent.get(state);
+//                if let (Some(head), Some(dependent)) = (head, dependent) {
+//                    let association = self.assoc_strength(&head, &dependent, &deprel);
+//                    non_lookup_slice[idx] = association;
+//                }
+//            }
+//        }
     }
 
     fn assoc_strength(&self, head: &str, dependent: &str, deprel: &str) -> f32 {

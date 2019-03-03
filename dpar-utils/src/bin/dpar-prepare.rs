@@ -28,6 +28,7 @@ use getopts::Options;
 use stdinout::{Input, OrExit, Output};
 
 use dpar_utils::{Config, SerializableTransitionSystem, TomlRead};
+use std::collections::HashMap;
 
 /// Ad-hoc shapes structure, which can be used to construct the
 /// Tensorflow parsing graph.
@@ -120,7 +121,8 @@ where
 {
     let lookups = config.lookups.create_lookups()?;
     let inputs = config.parser.load_inputs()?;
-    let association_strenghts = config.parser.load_associations()?;
+    //let association_strenghts = config.parser.load_associations()?;
+    let association_strenghts = HashMap::new();
     let vectorizer = InputVectorizer::new(lookups, inputs, association_strenghts);
     let system: S = S::default();
     let collector = NoopCollector::new(system, vectorizer)?;

@@ -119,7 +119,7 @@ where
             self.labels.push(Tensor::new(&[self.batch_size as u64]));
             self.non_lookup_inputs.push(Tensor::new(&[
                 self.batch_size as u64,
-                (n_deprel_embeds * T::ATTACHMENT_ADDRS.len()) as u64,
+                (T::ATTACHMENT_ADDRS.len()) as u64,
             ]));
         }
 
@@ -128,7 +128,7 @@ where
         let label = self.transition_system.transitions().lookup(t.clone());
         self.labels[batch][self.instance_idx] = label as i32;
 
-        let n_non_lookup_inputs = n_deprel_embeds * T::ATTACHMENT_ADDRS.len();
+        let n_non_lookup_inputs = T::ATTACHMENT_ADDRS.len();
         self.vectorizer.realize_into(
             state,
             &mut self.lookup_inputs[batch].to_instance_slices(self.instance_idx),
