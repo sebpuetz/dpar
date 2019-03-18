@@ -11,6 +11,7 @@ static CORRECT_STRING5: &'static str = "[STACK 0] FEATURE num";
 static CORRECT_STRING6: &'static str = "[STACK 0] CHAR 1 2";
 static CORRECT_STRING7: &'static str =
     "[STACK 0,\n  LDEP 0]\n  DEPREL\n  [STACK 0,\n RDEP 0] DEPREL";
+static CORRECT_STRING8: &'static str = "[STACK 0] FEATURE under_score";
 
 lazy_static! {
     static ref CORRECT1: Vec<AddressedValue> = vec![AddressedValue {
@@ -43,6 +44,10 @@ lazy_static! {
         address: vec![Source::Stack(0)],
         layer: Layer::Char(1, 2),
     }];
+    static ref CORRECT7: Vec<AddressedValue> = vec![AddressedValue {
+        address: vec![Source::Stack(0)],
+        layer: Layer::Feature("under_score".to_owned()),
+    }];
     static ref CORRECT_CASES: HashMap<&'static str, Vec<AddressedValue>> = hashmap! {
         CORRECT_STRING1 => CORRECT1.clone(),
         CORRECT_STRING2 => CORRECT2.clone(),
@@ -51,6 +56,7 @@ lazy_static! {
         CORRECT_STRING5 => CORRECT5.clone(),
         CORRECT_STRING6 => CORRECT6.clone(),
         CORRECT_STRING7 => CORRECT4.clone(),
+        CORRECT_STRING8 => CORRECT7.clone(),
     };
     static ref INCORRECT_CASES: Vec<&'static str> = vec![
         "[] TOKEN",
@@ -77,6 +83,8 @@ lazy_static! {
         "[STACK 0, LDEP 0] FEATURE\ntf",
         "[STACK 0, LDEP 0] CHAR 4\n4",
         "[STACK 0, LDEP 0] CHAR\n4 4",
+        "[STACK 0] FEATURE _",
+        "[STACK 0] FEATURE _leading",
     ];
 }
 
